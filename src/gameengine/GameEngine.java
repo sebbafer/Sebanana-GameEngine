@@ -1,12 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gameengine;
 
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -16,6 +14,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 /**
@@ -30,6 +29,8 @@ public class GameEngine extends Application {
     private static final HashMap<KeyCode,Double> dX;
     private static final HashMap<KeyCode,Double> dY;
     private static final double OFFSET = 10;
+    
+    private List<Rectangle> rectangles = new ArrayList<>();
     
     static {
         dX = new HashMap<>();
@@ -61,19 +62,35 @@ public class GameEngine extends Application {
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
         
+        /*
+         * Test code
+         */
+        rectangles.add(new Rectangle(40, 100, 50, 200));
+        rectangles.add(new Rectangle(300,200,420,230));
+        
         primaryStage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>(){
 
             @Override
             public void handle(KeyEvent t) {
+                double nx = x;
+                double ny = y;
+                
                 if(dX.get(t.getCode()) != null){
-                    x += dX.get(t.getCode());
-                    y += dY.get(t.getCode());
+                    nx += dX.get(t.getCode());
+                    ny += dY.get(t.getCode());
+                }
+                
+                if (!pointCollides(nx, ny)){
+                    x = nx;
+                    y = ny;
                 }
                 
                 updateGraphics(gc);
             }
             
         });
+        
+        updateGraphics(gc);
         
         primaryStage.show();
     }
@@ -92,9 +109,23 @@ public class GameEngine extends Application {
     private void updateGraphics(GraphicsContext gc){
         gc.clearRect(0, 0, 800, 600);
         gc.strokeLine(x, y, x+1, y+1); // Een Lijn met lengte sqrt(2)
+        
+        for (Rectangle rect : rectangles){
+            gc.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        }
     }
     
-    
+    private boolean pointCollides(double x, double y){
+        
+        for (Rectangle rect : rectangles){
+            if (x <= rect.getX()+rect.getWidth() && x >= rect.getX() && y <= rect.getY()+rect.getHeight() && y >= rect.getY()){
+                return true;
+            }
+        }
+        
+        return false;
+        
+    }
 
     /**
      * The main() method is ignored in correctly deployed JavaFX application.
