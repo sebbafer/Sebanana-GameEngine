@@ -1,7 +1,5 @@
 package gameengine;
 
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +29,7 @@ public class GameEngine extends Application {
     private static final double OFFSET = 10;
     
     private List<Rectangle> rectangles = new ArrayList<>();
+    private boolean bgDrawn = false;
     
     static {
         dX = new HashMap<>();
@@ -54,7 +53,7 @@ public class GameEngine extends Application {
         primaryStage.setTitle("Game Engine Test");
         Group root = new Group();
         
-        Canvas canvas = new Canvas(800,600);
+        Canvas canvas = new Canvas(1024,768);
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         
         initGC(gc);
@@ -72,6 +71,9 @@ public class GameEngine extends Application {
 
             @Override
             public void handle(KeyEvent t) {
+                
+                gc.clearRect(x-3, y-3, 8, 8);
+                
                 double nx = x;
                 double ny = y;
                 
@@ -90,6 +92,7 @@ public class GameEngine extends Application {
             
         });
         
+        bgDrawn = false;
         updateGraphics(gc);
         
         primaryStage.show();
@@ -100,25 +103,34 @@ public class GameEngine extends Application {
         gc.setStroke(Color.RED);
         gc.setLineWidth(5);
         
-        x = 20;
-        y = 20;
+        x = 10;
+        y = 10;
         
         updateGraphics(gc);
     }
     
     private void updateGraphics(GraphicsContext gc){
-        gc.clearRect(0, 0, 800, 600);
         gc.strokeLine(x, y, x+1, y+1); // Een Lijn met lengte sqrt(2)
         
-        for (Rectangle rect : rectangles){
-            gc.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+        if(!bgDrawn){
+            for (Rectangle rect : rectangles){
+                System.out.println("redrawing background");
+                gc.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+            }
+            
+            bgDrawn = true;
         }
     }
     
     private boolean pointCollides(double x, double y){
         
         for (Rectangle rect : rectangles){
-            if (x <= rect.getX()+rect.getWidth() && x >= rect.getX() && y <= rect.getY()+rect.getHeight() && y >= rect.getY()){
+            if (x <= rect.getX()+rect.getWidth() && x >= rect.getX() &&
+                    y <= rect.getY()+rect.getHeight() && y >= rect.getY()){
+                return true;
+            }
+            
+            if (x >= 1024 || y >= 768 || x <= 0 || y <= 0){
                 return true;
             }
         }
